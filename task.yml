@@ -1,0 +1,39 @@
+---
+AWSTemplateFormatVersion: 2010-09-09 
+Parameters:
+    ExRole:
+      Type: String
+Resources:
+    Task:
+        Type: AWS::ECS::TaskDefinition
+        Properties:
+            Family: redis-python 
+            Cpu: 1 vCPU
+            ExecutionRoleArn: !Ref ExRole
+            Memory: 1 GB
+            NetworkMode: bridge
+            RequiresCompatibilities:
+                - EC2
+            TaskRoleArn: !Ref ExRole
+            ContainerDefinitions: 
+              - Essential: true
+                Image: redis:latest
+                Name: redis 
+              - Essential: true
+                Image: 020046395185.dkr.ecr.us-east-2.amazonaws.com/python-app:latest
+                Name: python
+                PortMappings:  
+                  - ContainerPort: 5000
+                    HostPort: 0
+                    Protocol: tcp
+                DependsOn:
+                   - Condition: START  
+                     ContainerName: redis
+                Links: 
+                   - redis            
+Outputs:
+  Task:
+    Description: Contains all the task specifications
+    Value: !Ref Task
+    Export:
+      Name: "Task"

@@ -1,0 +1,43 @@
+---
+AWSTemplateFormatVersion: 2010-09-09 
+Parameters:
+    ExRole:
+      Type: String
+    RDS:
+      Type: String
+Resources:
+    Task:
+        Type: AWS::ECS::TaskDefinition
+        Properties:
+            Family: wordpress 
+            Cpu: 1 vCPU
+            ExecutionRoleArn: !Ref ExRole
+            Memory: 1 GB
+            NetworkMode: bridge
+            RequiresCompatibilities:
+                - EC2
+            TaskRoleArn: !Ref ExRole
+            ContainerDefinitions: 
+              - Essential: true
+                Image: wordpress:latest
+                Name: wordpress
+                PortMappings:  
+                  - ContainerPort: 80
+                    HostPort: 0
+                    Protocol: tcp 
+                Environment:
+                  - Name: WORDPRESS_DB_HOST
+                    Value: !Ref RDS 
+                  - Name: WORDPRESS_DB_USER
+                    Value: wahajdb 
+                  - Name: WORDPRESS_DB_PASSWORD
+                    Value: wahaj123a 
+                  - Name: WORDPRESS_DB_NAME
+                    Value: wahajdb 
+    
+Outputs:
+  Task:
+    Description: Contains all the task specifications
+    Value: !Ref Task
+    Export:
+      Name: "Task"

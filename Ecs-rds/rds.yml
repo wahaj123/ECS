@@ -1,0 +1,46 @@
+---
+AWSTemplateFormatVersion: 2010-09-09 
+Parameters:
+    dbsg:
+      Type: String
+    
+    SubnetA:
+      Type: String
+
+    SubnetB:
+      Type: String
+Resources:
+    RDS:
+        Type: AWS::RDS::DBInstance
+        Properties: 
+            AllocatedStorage: 20 
+            AvailabilityZone: us-east-2a
+            DBInstanceClass: db.t2.micro
+            DBInstanceIdentifier: wahajdb
+            DBName: wahajdb
+            VPCSecurityGroups: 
+                - !Ref dbsg
+            Engine: mysql
+            EngineVersion: 8.0.17
+            MasterUsername: wahajdb
+            MasterUserPassword: wahaj123a
+            Port: 3306
+            DBSubnetGroupName:
+                Ref: subnetgroup
+    subnetgroup:
+        Type: AWS::RDS::DBSubnetGroup
+        Properties: 
+            DBSubnetGroupDescription: subnet group
+            DBSubnetGroupName: subnetgroup
+            SubnetIds: 
+                - !Ref SubnetA
+                - !Ref SubnetB
+
+
+Outputs:
+  RDS:
+    Description: security group of wahajwebserver
+    Value: !GetAtt RDS.Endpoint.Address
+    Export:
+        Name: "RDS"
+

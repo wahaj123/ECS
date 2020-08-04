@@ -1,0 +1,80 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+    SubnetA:
+      Type: String
+    SubnetB:
+      Type: String
+    VpcID:
+      Type: String
+Resources:
+    Albsg:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupName: alb-sg
+            VpcId: !Ref VpcID
+            SecurityGroupIngress:
+                - IpProtocol: tcp
+                  FromPort: 80
+                  ToPort: 80
+                  CidrIp: 0.0.0.0/0
+                  Description: For traffic from Internet
+            GroupDescription: Security Group for demo server
+    Alb:
+        Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+        Properties: 
+            IpAddressType: ipv4
+            Name: Alb
+            Scheme: internet-facing
+            SecurityGroups: 
+                - !Ref Albsg
+            Subnets:
+                - Ref: "SubnetA"
+                - Ref: "SubnetB"
+            Type: application
+    DefaultTargetGroup:
+        Type: AWS::ElasticLoadBalancingV2::TargetGroup
+        DependsOn: Alb
+        Properties:
+            Name: alb-tg
+            VpcId: !Ref VpcID
+            Port: 8080
+            Protocol: HTTP
+    LoadBalancerListener:
+        Type: AWS::ElasticLoadBalancingV2::Listener
+        Properties:
+            LoadBalancerArn: !Ref Alb
+            Port: 80
+            Protocol: HTTP
+            DefaultActions:
+                - Type: forward
+                  TargetGroupArn: !Ref DefaultTargetGroup
+Outputs:
+  Albsg:
+    Description: security group for application load balancer
+    Value: !Ref Albsg
+    Export:
+        Name: "Albsg"
+  Alb:
+    Description: application load balancer
+    Value: !Ref Alb
+    Export:
+      Name: "Alb"
+  DefaultTargetGroup:
+    Description: Default Target Group
+    Value: !Ref DefaultTargetGroup
+    Export:
+      Name: "DefaultTargetGroup"
+
+#   SubnetA:
+#     Value: !Ref SubnetA
+#     Export:
+#         Name: "SubnetA"
+#   SubnetB:
+#     Value: !Ref SubnetB
+#     Export:
+#         Name: "SubnetB"
+#   VpcID:
+#     Value: !Ref VpcID
+#     Export:
+#         Name: "VpcID"           

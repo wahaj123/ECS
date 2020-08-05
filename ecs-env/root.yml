@@ -1,0 +1,122 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  bucketname:
+    Type: String
+    Description: Path to the bucket
+    Default: wahaj-webserver
+  bucketpath:
+    Type: String
+    Description: Path to the bucket
+    Default: /prod #/env #/mysql
+  Env:
+    Type: String
+    Description: Select the appropriate environment
+    AllowedValues:
+      - dev
+      - test
+      - uat
+      - prod
+  Cidr:
+    Description: Cidr for vpc
+    Default: 15.0.0.0/16
+    Type: String
+  
+  Publicsubnet1:
+    Description: public subnet 1
+    Default: 15.0.1.0/24
+    Type: String
+
+  Publicsubnet2:
+    Description: public subnet 2
+    Default: 15.0.2.0/24
+    Type: String
+  
+  Privatesubnet1:
+    Description: Private subnet 1
+    Default: 15.0.3.0/24
+    Type: String
+
+  Privatesubnet2:
+    Description: Private subnet 2
+    Default: 15.0.4.0/24
+    Type: String
+
+Resources:
+  Vpcstack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/vpc.yml"
+      Parameters:  
+        Env: !Ref Env
+        Cidr: !Ref Cidr
+        Publicsubnet1: !Ref Publicsubnet1
+        Publicsubnet2: !Ref Publicsubnet2
+        Privatesubnet1: !Ref Privatesubnet1
+        Privatesubnet2: !Ref Privatesubnet2  
+
+  role:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/role.yml"
+      Parameters:  
+        Env: !Ref Env
+  alb:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/alb.yml"
+      Parameters:
+        SubnetA: !GetAtt Vpcstack.Outputs.SubnetA
+        SubnetB: !GetAtt Vpcstack.Outputs.SubnetB
+        VpcID: !GetAtt Vpcstack.Outputs.VpcID
+        Env: !Ref Env
+  # sg:
+  #   Type: AWS::CloudFormation::Stack
+  #   DependsOn: alb
+  #   Properties:
+  #     TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/sg.yml"
+  #     Parameters:  
+  #       VpcID: !GetAtt Vpcstack.Outputs.VpcID
+  #       Albsg: !GetAtt alb.Outputs.Albsg
+  #       Env: !Ref Env
+       
+  # RDS:
+  #   Type: AWS::CloudFormation::Stack
+  #   DependsOn: sg
+  #   Properties:
+  #     TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/rds.yml"
+  #     Parameters: 
+  #       dbsg: !GetAtt sg.Outputs.dbsg 
+  #       SubnetA: !GetAtt Vpcstack.Outputs.SubnetA
+  #       SubnetB: !GetAtt Vpcstack.Outputs.SubnetB
+  #       # Env: !Ref Env
+
+  # task:
+  #   DependsOn: RDS
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/task.yml"
+  #     Parameters:
+  #       ExRole: !GetAtt role.Outputs.ExRole
+  #       RDS: !GetAtt RDS.Outputs.RDS
+      
+  # Cluster:
+  #   DependsOn: task
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/serivce&asg.yml"
+  #     Parameters:
+  #       DefaultTargetGroup: !GetAtt alb.Outputs.DefaultTargetGroup
+  #       Task: !GetAtt task.Outputs.Task
+  #       InstanceProfile: !GetAtt role.Outputs.InstanceProfile
+  #       Albsg: !GetAtt alb.Outputs.Albsg
+  #       SubnetA: !GetAtt Vpcstack.Outputs.SubnetA
+  #       SubnetB: !GetAtt Vpcstack.Outputs.SubnetB
+  #       VpcID: !GetAtt Vpcstack.Outputs.VpcID
+  #       wahajwebserver: !GetAtt sg.Outputs.wahajwebserver
+  #       Env: !Ref Env
+
+
+    
+
+      

@@ -100,21 +100,21 @@ Resources:
         ExRole: !GetAtt role.Outputs.ExRole
         RDS: !GetAtt RDS.Outputs.RDS
       
-  # Cluster:
-  #   DependsOn: task
-  #   Type: AWS::CloudFormation::Stack
-  #   Properties:
-  #     TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/serivce&asg.yml"
-  #     Parameters:
-  #       DefaultTargetGroup: !GetAtt alb.Outputs.DefaultTargetGroup
-  #       Task: !GetAtt task.Outputs.Task
-  #       InstanceProfile: !GetAtt role.Outputs.InstanceProfile
-  #       Albsg: !GetAtt alb.Outputs.Albsg
-  #       SubnetA: !GetAtt Vpcstack.Outputs.SubnetA
-  #       SubnetB: !GetAtt Vpcstack.Outputs.SubnetB
-  #       VpcID: !GetAtt Vpcstack.Outputs.VpcID
-  #       wahajwebserver: !GetAtt sg.Outputs.wahajwebserver
-  #       Env: !Ref Env
+  Cluster:
+    DependsOn: task
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/serivce&asg.yml"
+      Parameters:
+        DefaultTargetGroup: !GetAtt alb.Outputs.DefaultTargetGroup
+        Task: !GetAtt task.Outputs.Task
+        InstanceProfile: !GetAtt role.Outputs.InstanceProfile
+        Albsg: !GetAtt alb.Outputs.Albsg
+        SubnetA: !GetAtt Vpcstack.Outputs.SubnetA
+        SubnetB: !GetAtt Vpcstack.Outputs.SubnetB
+        VpcID: !GetAtt Vpcstack.Outputs.VpcID
+        wahajwebserver: !GetAtt sg.Outputs.wahajwebserver
+        Env: !Ref Env
 
 
     

@@ -70,35 +70,35 @@ Resources:
         SubnetB: !GetAtt Vpcstack.Outputs.SubnetB
         VpcID: !GetAtt Vpcstack.Outputs.VpcID
         Env: !Ref Env
-  # sg:
-  #   Type: AWS::CloudFormation::Stack
-  #   DependsOn: alb
-  #   Properties:
-  #     TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/sg.yml"
-  #     Parameters:  
-  #       VpcID: !GetAtt Vpcstack.Outputs.VpcID
-  #       Albsg: !GetAtt alb.Outputs.Albsg
-  #       Env: !Ref Env
+  sg:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: alb
+    Properties:
+      TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/sg.yml"
+      Parameters:  
+        VpcID: !GetAtt Vpcstack.Outputs.VpcID
+        Albsg: !GetAtt alb.Outputs.Albsg
+        Env: !Ref Env
        
-  # RDS:
-  #   Type: AWS::CloudFormation::Stack
-  #   DependsOn: sg
-  #   Properties:
-  #     TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/rds.yml"
-  #     Parameters: 
-  #       dbsg: !GetAtt sg.Outputs.dbsg 
-  #       SubnetA: !GetAtt Vpcstack.Outputs.SubnetA
-  #       SubnetB: !GetAtt Vpcstack.Outputs.SubnetB
-  #       # Env: !Ref Env
+  RDS:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: sg
+    Properties:
+      TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/rds.yml"
+      Parameters: 
+        dbsg: !GetAtt sg.Outputs.dbsg 
+        SubnetA: !GetAtt Vpcstack.Outputs.SubnetA
+        SubnetB: !GetAtt Vpcstack.Outputs.SubnetB
+        # Env: !Ref Env
 
-  # task:
-  #   DependsOn: RDS
-  #   Type: AWS::CloudFormation::Stack
-  #   Properties:
-  #     TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/task.yml"
-  #     Parameters:
-  #       ExRole: !GetAtt role.Outputs.ExRole
-  #       RDS: !GetAtt RDS.Outputs.RDS
+  task:
+    DependsOn: RDS
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/task.yml"
+      Parameters:
+        ExRole: !GetAtt role.Outputs.ExRole
+        RDS: !GetAtt RDS.Outputs.RDS
       
   # Cluster:
   #   DependsOn: task

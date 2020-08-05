@@ -50,7 +50,7 @@ Outputs:
     Description: security group of wahajwebserver
     Value: !Ref dbsg
     Export:
-        Name: "dbsg"
+        Name: !Sub "${AWS::StackName}-dbsg"
   wahajwebserver:
     Description: security group of wahajwebserver
     Value: !Ref wahajwebserver

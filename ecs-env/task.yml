@@ -21,7 +21,7 @@ Resources:
     Task:
         Type: AWS::ECS::TaskDefinition
         Properties:
-            Family: wordpress 
+            Family: !Sub "${AWS::StackName}-wordpress" 
             Cpu: 1 vCPU
             ExecutionRoleArn: !Ref ExRole
             Memory: 1 GB

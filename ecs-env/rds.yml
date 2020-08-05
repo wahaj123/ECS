@@ -19,7 +19,7 @@ Resources:
             AllocatedStorage: 20 
             AvailabilityZone: us-east-2a
             DBInstanceClass: db.t2.micro
-            DBInstanceIdentifier: wahajdb
+            # DBInstanceIdentifier: wahajdb
             DBName: wahajdb
             VPCSecurityGroups: 
                 - !Ref dbsg
@@ -34,7 +34,7 @@ Resources:
         Type: AWS::RDS::DBSubnetGroup
         Properties: 
             DBSubnetGroupDescription: subnet group
-            DBSubnetGroupName: subnetgroup
+            # DBSubnetGroupName: !Sub "${AWS::StackName}subnetgroup"
             SubnetIds: 
                 - !Ref SubnetA
                 - !Ref SubnetB
@@ -45,5 +45,5 @@ Outputs:
     Description: security group of wahajwebserver
     Value: !GetAtt RDS.Endpoint.Address
     Export:
-        Name: "!Sub "${AWS::StackName}-"
+        Name: !Sub "${AWS::StackName}-RDS"
 

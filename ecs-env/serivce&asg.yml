@@ -110,7 +110,7 @@ Resources:
         Timeout: PT5M
         Count: !Ref DesiredCapacity
     Properties:
-      AutoScalingGroupName: !Sub "myASG-{$Env}"
+      #AutoScalingGroupName: !Sub "myASG-{$Env}"
       MinSize: !Ref MinSize
       MaxSize: !Ref MaxSize
       DesiredCapacity: !Ref DesiredCapacity

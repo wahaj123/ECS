@@ -15,7 +15,7 @@ Resources:
     wahajwebserver:
         Type: AWS::EC2::SecurityGroup
         Properties:
-          GroupName: !Sub "wahaj-webserver-{$Env}"
+          #GroupName: !Sub "wahaj-webserver-{$Env}"
           SecurityGroupIngress:
             - IpProtocol: tcp
               FromPort: 22
@@ -31,7 +31,7 @@ Resources:
     dbsg:
         Type: AWS::EC2::SecurityGroup
         Properties:
-            GroupName: !Sub "dbsg-{$Env}"
+            #GroupName: !Sub "dbsg-{$Env}"
             SecurityGroupIngress:
                 - IpProtocol: tcp
                   FromPort: 22

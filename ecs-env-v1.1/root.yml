@@ -83,7 +83,7 @@ Parameters:
     Type: Number
     Default: 2
 
-  serivcename:
+  servicename:
     Type: String
     Default: Wordpress
     
@@ -177,7 +177,7 @@ Resources:
         DesiredCapacity: !Ref DesiredCapacity
         DesiredCount: !Ref DesiredCount
         containerName: !Ref containerName
-        serivcename: !Ref serivcename
+        servicename: !Ref servicename
 
 
     

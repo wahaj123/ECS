@@ -48,7 +48,7 @@ Resources:
             Port: 80
             Protocol: HTTP
             Matcher:
-              HttpCode: 302
+              HttpCode: 200-399
     LoadBalancerListener:
         Type: AWS::ElasticLoadBalancingV2::Listener
         Properties:

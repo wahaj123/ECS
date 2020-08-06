@@ -38,7 +38,7 @@ Resources:
                 Name: !Ref containerName
                 PortMappings:  
                   - ContainerPort: 80
-                    HostPort: 0
+                    HostPort: 80
                     Protocol: tcp 
                 Environment:
                   - Name: WORDPRESS_DB_HOST

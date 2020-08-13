@@ -1,0 +1,67 @@
+---
+    AWSTemplateFormatVersion: 2010-09-09
+    Parameters:
+      bucketname:
+        Type: String
+        Description: Path to the bucket
+        Default: wahaj-webserver
+      bucketpath:
+        Type: String
+        Description: Path to the bucket
+        Default: /Ecr
+    Resources:
+      Vpcstack:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+          TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/vpc.yml"
+      role:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+          TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/role.yml"
+      task:
+        DependsOn: role
+        Type: AWS::CloudFormation::Stack
+        Properties:
+          TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/task.yml"
+          Parameters:
+            ExRole: !GetAtt role.Outputs.ExRole
+      alb:
+        DependsOn: task
+        Type: AWS::CloudFormation::Stack
+        Properties:
+          TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/alb.yml"
+          Parameters:
+            SubnetA: !GetAtt Vpcstack.Outputs.SubnetA
+            SubnetB: !GetAtt Vpcstack.Outputs.SubnetB
+            VpcID: !GetAtt Vpcstack.Outputs.VpcID
+      Cluster:
+        DependsOn: alb
+        Type: AWS::CloudFormation::Stack
+        Properties:
+          TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/serivce&asg.yml"
+          Parameters:
+            # Alb: !GetAtt alb.Outputs.Alb
+            DefaultTargetGroup: !GetAtt alb.Outputs.DefaultTargetGroup
+            Task: !GetAtt task.Outputs.Task
+            InstanceProfile: !GetAtt role.Outputs.InstanceProfile
+            Albsg: !GetAtt alb.Outputs.Albsg
+            SubnetA: !GetAtt Vpcstack.Outputs.SubnetA
+            SubnetB: !GetAtt Vpcstack.Outputs.SubnetB
+            VpcID: !GetAtt Vpcstack.Outputs.VpcID
+
+    #   autoscaling:
+    #         DependsOn: alb
+    #         Type: AWS::CloudFormation::Stack
+    #         Properties:
+    #             TemplateURL: !Sub "https://${bucketname}.s3.us-east-2.amazonaws.com${bucketpath}/Autoscaling.yml"
+    #             Parameters:
+    #                 SubnetA: !GetAtt Vpcstack.Outputs.SubnetA
+    #                 SubnetB: !GetAtt Vpcstack.Outputs.SubnetB
+    #                 VpcID: !GetAtt Vpcstack.Outputs.VpcID
+    #                 Albsg: !GetAtt alb.Outputs.Albsg
+    #                 Alb: !GetAtt alb.Outputs.Alb
+    #                 ECSServiceRole: !GetAtt role.Outputs.ECSServiceRole
+
+    
+
+      

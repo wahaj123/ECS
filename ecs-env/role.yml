@@ -1,0 +1,80 @@
+---
+AWSTemplateFormatVersion: 2010-09-09 
+Parameters:
+  Env:
+    Type: String
+Resources:
+  ExRole:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - ecs-tasks.amazonaws.com
+              Action:
+                - 'sts:AssumeRole'
+        Path: /
+        RoleName: !Sub "excutionrole-${Env}"
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        Policies: 
+          - PolicyName: AccessECR
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action: 
+                    - ecr:BatchGetImage
+                    - ecr:GetAuthorizationToken
+                    - ecr:GetDownloadUrlForLayer 
+                  Resource: '*'
+
+  ContainerInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'               
+        Statement:
+          - Effect: Allow
+            Principal: 
+                Service: 
+                    - ec2.amazonaws.com
+            Action: 
+                - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+      Path: '/'
+      RoleName: !Sub "ContainerInstanceRole-${Env}"
+  
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties: 
+      Roles: 
+        - !Ref ContainerInstanceRole      
+
+Outputs:
+  ExRole:
+    Description: Task excution role
+    Value: !Ref ExRole
+    Export:
+        Name: !Sub "${AWS::StackName}-ExRole"
+  InstanceProfile:
+    Description: profile for container instances
+    Value: !Ref InstanceProfile
+    Export:
+        Name: !Sub "${AWS::StackName}-InstanceProfile"
+  
+  # ExRole:
+  #   Description: Task excution role
+  #   Value: !Ref ExRole
+  #   Export:
+  #       Name: "ExRole"
+  # InstanceProfile:
+  #   Description: profile for container instances
+  #   Value: !Ref InstanceProfile
+  #   Export:
+  #       Name: "InstanceProfile"            

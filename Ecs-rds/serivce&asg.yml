@@ -1,0 +1,121 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: wahaj(webserver)
+
+  DesiredCapacity:
+    Type: Number
+    Default: 2
+
+  MinSize:
+    Type: Number
+    Default: 1
+
+  MaxSize:
+    Type: Number
+    Default: 4  
+
+  InstanceProfile:
+    Type: String
+
+  DefaultTargetGroup:
+    Type: String
+  
+  wahajwebserver:
+    Type: String
+
+  Task:
+    Type: String
+
+  Albsg:
+    Type: String
+
+  VpcID:
+    Type: String
+
+  SubnetA:
+    Type: String
+      
+  SubnetB:
+    Type: String
+  
+  wahajwebserver:
+    Type: String
+
+
+Resources:
+
+  MyCluster:
+      Type: AWS::ECS::Cluster
+      Properties: {}
+
+  Myservice:
+      Type: AWS::ECS::Service
+      Properties: 
+          Cluster: !Ref MyCluster        
+          DeploymentController:   
+              Type: ECS
+          DesiredCount: 2
+          LaunchType: EC2
+          LoadBalancers: 
+              - ContainerName: wordpress
+                ContainerPort: 80
+                TargetGroupArn: !Ref DefaultTargetGroup
+          #Role: !Ref InstanceProfile
+          SchedulingStrategy: REPLICA
+          ServiceName: wordpress
+          TaskDefinition: !Ref Task
+
+  ec2instance:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+
+          yum update -y && yum install -y aws-cfn-bootstrap 
+
+          echo ECS_CLUSTER=${MyCluster} >> /etc/ecs/ecs.config
+          echo ECS_BACKEND_HOST= >> /etc/ecs/ecs.config           
+
+          /opt/aws/bin/cfn-signal -e $? \
+                --stack ${AWS::StackName} \
+                --resource myASG \
+                --region ${AWS::Region}
+
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            DeleteOnTermination: "true"
+            VolumeSize: 30
+            VolumeType: gp2
+      ImageId: ami-06e05a843071324d1 
+      InstanceType: t2.small
+      IamInstanceProfile: !Ref InstanceProfile
+      KeyName: !Ref KeyName
+      SecurityGroups:
+          - Ref: wahajwebserver
+
+  myASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT5M
+        Count: !Ref DesiredCapacity
+    Properties:
+      #AutoScalingGroupName: myASG
+      MinSize: !Ref MinSize
+      MaxSize: !Ref MaxSize
+      DesiredCapacity: !Ref DesiredCapacity
+      HealthCheckGracePeriod: 300
+      LaunchConfigurationName:
+        Ref: ec2instance
+      VPCZoneIdentifier:
+        - !Ref SubnetA
+        - !Ref SubnetB
+      TargetGroupARNs:
+        - !Ref DefaultTargetGroup
